@@ -2,9 +2,6 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <unordered_map>
-
-using namespace std;
 
 // 1-100000 为常量
 // 100001-300000为变量
@@ -21,24 +18,50 @@ using namespace std;
 #define KEY_LB 500001
 #define KEY_UB 600000
 
-int conCounter = CON_LB;
-int varCounter = VAR_LB;
-int chaCounter = CHA_LB;
-int chaOptCounter = CHA_OPT_LB;
-int keyCounter = KEY_LB;
+#define IF_CODE 550000
+#define ELSE_CODE 560000
+#define BLOCK_CODE 570000
+
+#define LEFT_BRACKET 300001
+#define RIGHT_BRACKET 300002
+#define GREATER_CODE 310000
+#define LESS_CODE 310001
+#define ADD_CODE 420000
+#define MINUS_CODE 420001
+#define ASSIGN_CODE 330000
+#define SEMICOLON_CODE 340000
+#define LEFT_BRACE 350000
+#define RIGHT_BRACE 360000
+
+#define BOOKNUM_CODE 200001
+#define BAR_CODE 200002
+#define BOOK_CODE 100001
+#define K_CODE 100002
+#define K1_CODE 100003
+#define K2_CODE 100004
+#define K3_CODE 100005
+#define K4_CODE 100006
+#define W_CODE 110000
+#define N_CODE 111000
+#define U_CODE 111100
+#define DEST_CODE 120000
+
+using namespace std;
+
+int u = 10;
+int bookNum = 200;
+int bar = 50;
+int dest = 60;
+int book = 20;
+int k = 300;
+int w = 5;
+int n = 200;
+int k1, k2, k3, k4;
 
 // 假设所有单元间至少有一个空格
 // 单元定义为 变量名 或 数字 或 符号
 // 假设所有算数运算符( + 和 - )只有两个操作数
-string s1 = R"(u = 10;
-bookNum = 200;
-bar = 50;
-dest = 60;
-book = 20;
-k = 300;
-w = 5;
-n = 200;
-if ( bookNum > bar + 100 )
+string s = R"(if ( bookNum > bar + 100 )
 {
     if ( n - 6 < 90 + dest )
     {
@@ -62,47 +85,6 @@ if ( bookNum > bar + 100 )
 }
 )";
 
-string s2 = R"(u  =  10;
-mycthenumt = 200 ;
-dock345 = 50 ;
-mypad56 = 60 ;
-apple123 = 20 ;
-k = 300 + mypad56 ;
-w = 5 ;
-thenum = 200 ;
-if ( mycthenumt > dock345 + 100 )
-{
-    if ( thenum - 60 < 90 + mypad56 )
-    {
-        k1 = 100 - dock345;
-        k2 = k1 + mypad56;
-        k3 = k2- w;
-        k4 = k3+ u;
-        if (k > apple123 + 350 )
-        {
-             k = apple123 + 100;
-             k2 = k + mypad56;
-             k3 =  k2 + thenum;
-             k4 = k3+  k2;
-        }
-        else
-        {
-             apple123 = k - 20;
-             k2 =  apple123 - w;
-             k3 =  k2 + thenum;
-             k4 = k3-  k2;
-        }
-    }
-    else 
-    {
-        w = w + 60;
-         k2 =  dock345 - w;
-         k3 =  k2 + mycthenumt;
-         k4 = k3-  k2;
-    }
-}
-)";
-
 struct TNode
 {
     vector<TNode *> child;
@@ -111,31 +93,6 @@ struct TNode
     TNode() : data(0) {}
     TNode(int val) : data(val) {}
 };
-
-struct CodeRange
-{
-    int con_lb;
-    int con_ub;
-    int var_lb;
-    int var_ub;
-    int sym_lb;
-    int sym_ub;
-    int opt_lb;
-    int opt_ub;
-    int key_lb;
-    int key_ub;
-} codeRange = {
-    1, 100000,
-    100001, 300000,
-    300001, 400000,
-    400001, 500000,
-    500001, 600000
-
-};
-
-unordered_map<string, int> varToCode;
-unordered_map<string, int> strToCode;
-unordered_map<int, int> varCodeToVal;
 
 void convert(istringstream &iss, vector<int> &code);
 TNode *buildTree(vector<int>::iterator &it);
@@ -153,7 +110,7 @@ int unknown = -1;
 
 int main()
 {
-    istringstream iss(s1);
+    istringstream iss(s);
 
     convert(iss, code);
 
@@ -163,71 +120,23 @@ int main()
 
     vt(root);
 
+    cout << "u = " << u << endl;
+    cout << "bookNum = " << bookNum << endl;
+    cout << "bar = " << bar << endl;
+    cout << "dest = " << dest << endl;
+    cout << "book = " << book << endl;
+    cout << "w = " << w << endl;
+    cout << "n = " << n << endl;
+    cout << "k = " << k << endl;
+    cout << "k1 = " << k1 << endl;
+    cout << "k2 = " << k2 << endl;
+    cout << "k3 = " << k3 << endl;
+    cout << "k4 = " << k4 << endl;
+    // cout << "unknown = " << unknown << endl;
+
     deleteTree(root);
 
     return 0;
-}
-
-vector<string> tokenize(string &input)
-{
-    vector<string> tokens;
-    string token;
-    for (auto c : input)
-    {
-        if (isspace(c))
-        {
-            if (!token.empty())
-            {
-                tokens.push_back(token);
-                token.clear();
-            }
-        }
-        else if (ispunct(c))
-        {
-            if (!token.empty())
-            {
-                tokens.push_back(token);
-                token.clear();
-            }
-            tokens.push_back(string(1, c));
-        }
-        else
-        {
-            token += c;
-        }
-    }
-    if (!token.empty())
-    {
-        tokens.push_back(token);
-    }
-    return tokens;
-}
-
-void convert(vector<string> tokens, vector<int> &code)
-{
-    for (const auto &token : tokens)
-    {
-        if (strToCode.count(token))
-        {
-            code.push_back(strToCode[token]);
-        }
-        else if (all_of(token.begin(), token.end(), ::isdigit))
-        {
-            int num = stoi(token);
-            if (num >= codeRange.con_lb && num <= codeRange.con_ub)
-            {
-                code.push_back(num);
-            }
-            else
-            {
-                cerr << "constant out of range: " << token << endl;
-            }
-        }
-        else
-        {
-            int newVarCode =
-        }
-    }
 }
 
 void deleteTree(TNode *node)
@@ -462,4 +371,160 @@ int vt(TNode *p)
 
 int &getVarVal(int code)
 {
+    switch (code)
+    {
+    case BOOKNUM_CODE:
+        return bookNum;
+    case BAR_CODE:
+        return bar;
+    case BOOK_CODE:
+        return book;
+    case K_CODE:
+        return k;
+    case K1_CODE:
+        return k1;
+    case K2_CODE:
+        return k2;
+    case K3_CODE:
+        return k3;
+    case K4_CODE:
+        return k4;
+    case W_CODE:
+        return w;
+    case N_CODE:
+        return n;
+    case U_CODE:
+        return u;
+    case DEST_CODE:
+        return dest;
+    default:
+        cerr << "unknown code: " << code << endl;
+        return unknown;
+    }
+}
+
+void convert(istringstream &iss, vector<int> &code)
+{
+    string token;
+
+    while (iss >> token)
+    {
+        if (token == "if")
+        {
+            code.push_back(IF_CODE);
+        }
+        else if (token == "else")
+        {
+            code.push_back(ELSE_CODE);
+        }
+        else if (token == "(")
+        {
+            code.push_back(LEFT_BRACKET);
+        }
+        else if (token == ")")
+        {
+            code.push_back(RIGHT_BRACKET);
+        }
+        else if (token == ">")
+        {
+            code.push_back(GREATER_CODE);
+        }
+        else if (token == "<")
+        {
+            code.push_back(LESS_CODE);
+        }
+        else if (token == "+")
+        {
+            code.push_back(ADD_CODE);
+        }
+        else if (token == "-")
+        {
+            code.push_back(MINUS_CODE);
+        }
+        else if (token == "=")
+        {
+            code.push_back(ASSIGN_CODE);
+        }
+        else if (token == ";")
+        {
+            code.push_back(SEMICOLON_CODE);
+        }
+        else if (token == "{")
+        {
+            code.push_back(LEFT_BRACE);
+        }
+        else if (token == "}")
+        {
+            code.push_back(RIGHT_BRACE);
+        }
+        else if (token == "bookNum")
+        {
+            code.push_back(BOOKNUM_CODE);
+        }
+        else if (token == "bar")
+        {
+            code.push_back(BAR_CODE);
+        }
+        else if (token == "book")
+        {
+            code.push_back(BOOK_CODE);
+        }
+        else if (token == "k")
+        {
+            code.push_back(K_CODE);
+        }
+        else if (token == "k1")
+        {
+            code.push_back(K1_CODE);
+        }
+        else if (token == "k2")
+        {
+            code.push_back(K2_CODE);
+        }
+        else if (token == "k3")
+        {
+            code.push_back(K3_CODE);
+        }
+        else if (token == "k4")
+        {
+            code.push_back(K4_CODE);
+        }
+        else if (token == "w")
+        {
+            code.push_back(W_CODE);
+        }
+        else if (token == "n")
+        {
+            code.push_back(N_CODE);
+        }
+        else if (token == "u")
+        {
+            code.push_back(U_CODE);
+        }
+        else if (token == "dest")
+        {
+            code.push_back(DEST_CODE);
+        }
+        else
+        {
+            bool isNumber = true;
+            for (char c : token)
+            {
+                if (!isdigit(c))
+                {
+                    isNumber = false;
+                    break;
+                }
+            }
+            if (isNumber)
+            {
+                int numVal = stoi(token);
+                code.push_back(numVal);
+            }
+            else
+            {
+                cout << "not valid: '" << token << "'" << endl;
+            }
+        }
+    }
 }
