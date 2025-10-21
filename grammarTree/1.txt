@@ -1,0 +1,30 @@
+u = 10;
+bookNum = 200;
+bar = 50;
+dest = 60;
+book = 20;
+k = 300;
+w = 5;
+n = 200;
+if (bookNum > bar + 100)
+{
+	if (n - 6 < 90 + dest)
+	{
+		k1 = 100 - bar;
+		k2 = k1 + dest;
+		k3 = k2 - w;
+		k4 = k3 + u;
+		if (k > book)
+		{
+			k = book + 100;
+		}
+		else
+		{
+			book = k - 20;
+		}
+	}
+	else
+	{
+		w = w + 6;
+	}
+}

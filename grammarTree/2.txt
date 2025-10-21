@@ -1,0 +1,41 @@
+u  =  10;
+mycthenumt = 200;
+dock345 = 50;
+mypad56 = 60;
+apple123 = 20;
+k = 300 + mypad56;
+w=5;
+thenum = 200;
+if (mycthenumt > dock345 + 100)
+{
+    if ( thenum - 60 < 90 + mypad56)
+    {
+        k1 = 100 - dock345;
+        k2 = k1 + mypad56;
+        k3 = k2- w;
+        k4 = k3+ u;
+        if (k > apple123 + 350 )
+        {
+             k = apple123 + 100;
+             k2 = k + mypad56;
+             k3 =  k2 + thenum;
+             k4 = k3+  k2;
+        }
+        else
+        {
+             apple123 = k - 20;
+             k2 =  apple123 - w;
+             k3 =  k2 + thenum;
+             k4 = k3-  k2;
+        }
+    }
+    else 
+    {
+        w = w + 60;
+         k2 =  dock345 - w;
+         k3 =  k2 + mycthenumt;
+         k4 = k3-  k2;
+    }
+}
+
+
