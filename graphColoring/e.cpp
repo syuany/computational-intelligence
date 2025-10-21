@@ -23,20 +23,16 @@ bool evaluateSolution(int v, const vector<vector<int>> &map, const vector<int> &
     cout << "检查所有边的约束：|颜色i - 颜色j| ≥ 边权值" << endl
          << endl;
 
-    // 遍历所有节点对（i < j，避免重复检查无向图的边）
     for (int i = 1; i <= v; ++i) {
         for (int j = i + 1; j <= v; ++j) {
             int weight = map[i][j];
-            if (weight == 0) continue; // 无直接边，跳过
+            if (weight == 0) continue;
 
-            // 计算实际颜色差
             int colorDiff = abs(colors[i] - colors[j]);
 
-            // 检查约束是否满足
             if (colorDiff < weight) {
                 isCorrect = false;
                 errorCount++;
-                // 输出错误详情
                 cout << "错误 " << setw(2) << errorCount << "："
                      << "节点" << i << "与节点" << j
                      << "（边权=" << weight << "）" << endl
@@ -49,7 +45,6 @@ bool evaluateSolution(int v, const vector<vector<int>> &map, const vector<int> &
         }
     }
 
-    // 输出评估结果
     if (isCorrect) {
         cout << "评估结果：所有边的约束均满足，解正确！" << endl;
     } else {
@@ -58,9 +53,6 @@ bool evaluateSolution(int v, const vector<vector<int>> &map, const vector<int> &
     return isCorrect;
 }
 
-// --------------------------
-// 示例用法
-// --------------------------
 int main() {
     ifstream file("GraphData120.txt");
     int v, n;
@@ -76,16 +68,7 @@ int main() {
         map[i][j] = map[j][i] = val;
     }
 
-    // 示例：3个节点的图（测试用）
-    // int v = 3;
-    // vector<vector<int>> map(v + 1, vector<int>(v + 1, 0));
-    // // 边：1-2（权值3），2-3（权值2），1-3（权值1）
-    // map[1][2] = map[2][1] = 3;
-    // map[2][3] = map[3][2] = 2;
-    // map[1][3] = map[3][1] = 1;
-
-    // // 测试解1：正确解（颜色差均满足约束）
-    vector<int> correctColors(v + 1); // 0号元素 unused
+    vector<int> correctColors(v + 1);
     ifstream file1("test.txt");
     for (int i = 0; i <= v; i++) {
         file1 >> correctColors[i];
@@ -93,12 +76,6 @@ int main() {
 
     cout << "=== 测试正确解 ===" << endl;
     evaluateSolution(v, map, correctColors);
-
-    // // 测试解2：错误解（1-2颜色差不满足）
-    // vector<int> wrongColors = {0, 1, 3, 3};
-    // cout << endl
-    //      << "=== 测试错误解 ===" << endl;
-    // evaluateSolution(v, map, wrongColors);
 
     return 0;
 }
