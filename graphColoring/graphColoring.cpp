@@ -7,8 +7,8 @@
 using namespace std;
 
 const int CN = 60;
-const double FAIL_WEIGHT = 0.3;
-const int SORT_THRESHOLD = 10;
+const double FAIL_WEIGHT = 1;
+const int SORT_THRESHOLD = 66;
 
 int main() {
     ifstream file("GraphData120.txt");
@@ -22,7 +22,6 @@ int main() {
     vector<int> order(v);
     vector<int> processed;
     vector<vector<int>> map(v + 1, vector<int>(v + 1));
-    vector<vector<int>> neighbors(v + 1);
     iota(order.begin(), order.end(), 1);
 
     for (int k = 0; k < n; k++) {
@@ -35,11 +34,9 @@ int main() {
         map[i][j] = map[j][i] = val;
         weight_sum[i] += val;
         weight_sum[j] += val;
-        neighbors[i].push_back(j);
-        neighbors[j].push_back(i);
     }
 
-    int found = 0, min_max_col = CN;
+    int found = 0;
 
     auto sort_order = [&]() {
         sort(order.begin(), order.end(), [&](int a, int b) {
@@ -48,79 +45,63 @@ int main() {
             return priority_a > priority_b;
         });
     };
-    auto isRightColor = [&](int node, const vector<int> &processed) {
-        for (int neighbor : neighbors[node]) {
-            if (find(processed.begin(), processed.end(), neighbor) != processed.end()) {
-                if (abs(c[node] - c[neighbor]) < map[node][neighbor])
+
+    auto isValidColoring = [&](const vector<int> &coloring) {
+        for (int i = 1; i <= v; i++) {
+            for (int j = i + 1; j <= v; j++) {
+                if (map[i][j] && abs(coloring[i] - coloring[j]) < map[i][j]) {
                     return false;
+                }
             }
         }
         return true;
     };
-    auto get_possible_colors = [&](int node, const vector<int> &processed) {
-        vector<int> forbidden;
-        for (int neighbor : neighbors[node]) {
-            if (find(processed.begin(), processed.end(), neighbor) != processed.end()) {
-                int min_diff = map[node][neighbor];
-                int nb_color = c[neighbor];
-                // 禁止的颜色范围：(nb_color - min_diff, nb_color + min_diff)
-                forbidden.push_back(nb_color - min_diff + 1);
-                forbidden.push_back(nb_color + min_diff - 1);
-            }
+
+    auto isRightColor = [&](int node, const vector<int> &processed) {
+        for (int x : processed) {
+            if (map[node][x] && abs(c[node] - c[x]) < map[node][x])
+                return false;
         }
-        // 可行颜色：1~min_max_col中，不在任何禁止范围内的颜色
-        vector<int> possible;
-        for (int color = 1; color <= min_max_col; color++) {
-            bool ok = true;
-            for (size_t i = 0; i < forbidden.size(); i += 2) {
-                int low = forbidden[i];
-                int high = forbidden[i + 1];
-                if (color >= low && color <= high) {
-                    ok = false;
-                    break;
-                }
-            }
-            if (ok) possible.push_back(color);
-        }
-        return possible;
+        return true;
     };
-    auto vt = [&](this auto &&vt, int t) {
+
+    auto vt = [&](this auto &&vt, int t) -> bool {
         if (t == v) {
-            int cur_col = ranges::max(c);
-            if (!found || cur_col < min_max_col) {
-                min_max_col = cur_col;
+            if (isValidColoring(c)) {
                 best = c;
                 found = 1;
+                return true;
             }
-            return;
+            return false;
         }
 
-        int cur_node = order[t], all_failed = 1;
-        vector<int> possible_colors = get_possible_colors(cur_node, processed);
-        if (possible_colors.empty()) {
-            fail_count[cur_node]++;
-            if (fail_count[cur_node] % SORT_THRESHOLD == 0) {
-                sort_order();
-            }
-            return;
-        }
+        int cur_node = order[t];
+        bool success = false;
 
-        for (int color : possible_colors) {
+        for (int color = 1; color < CN; color++) {
             c[cur_node] = color;
-
             if (isRightColor(cur_node, processed)) {
-                all_failed = 0;
+                success = true;
                 processed.push_back(cur_node);
-                vt(t + 1);
+                if (vt(t + 1)) {
+                    processed.pop_back();
+                    return true;
+                }
                 processed.pop_back();
+            } else {
+                fail_count[cur_node]++;
             }
-        }
-        if (all_failed) {
-            fail_count[cur_node]++;
+
             if (fail_count[cur_node] % SORT_THRESHOLD == 0) {
                 sort_order();
             }
         }
+
+        if (!success && CN > 1) {
+            fail_count[cur_node]++;
+        }
+
+        return false;
     };
 
     sort_order();
@@ -129,13 +110,16 @@ int main() {
     if (found) {
         ofstream outFile("result.txt");
 
-        outFile << "Node\t\tColor\t\tFailed" << endl;
-        outFile << "----\t\t-----\t\t------" << endl;
-
-        for (int i = 1; i <= v; i++) {
-            outFile << i << "\t\t" << best[i] << "\t\t" << fail_count[i] << endl;
+        for (int i = 0; i < best.size(); i++) {
+            outFile << best[i] << " ";
+            if (i % 10 == 0) outFile << endl;
         }
-        outFile << "Total colors used: " << min_max_col << endl;
+
+        outFile << "Node\t\tColor\t\tFailures" << endl;
+        outFile << "----\t\t-----\t\t--------" << endl;
+        for (int i = 1; i <= v; i++) {
+            outFile << i << "\t\t\t" << best[i] << "\t\t\t" << fail_count[i] << endl;
+        }
 
         outFile.close();
     } else {
@@ -143,11 +127,6 @@ int main() {
         outFile << "solution not found" << endl;
         outFile.close();
     }
-    // if (found) {
-    //     ofstream outFile("test.txt");
-    //     for (int x : best) outFile << x << endl;
-    //     outFile.close();
-    // }
 
     return 0;
 }
