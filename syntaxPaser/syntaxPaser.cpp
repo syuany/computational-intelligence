@@ -429,7 +429,7 @@ TNode *ForExp(vector<int>::iterator &it) {
     if (it == code.end())
         return nullptr;
 
-    TNode *forNode = new TNode(*it); // FOR_CODE
+    TNode *forNode = new TNode(*it);
     ++it;
     if (it == code.end() || *it != LEFT_BRACKET)
         return nullptr;
